@@ -23,13 +23,11 @@ public class BresenhamAlgorithm {
 
         int dx = Math.abs(x1 - x0);
         int dy = Math.abs(y1 - y0);
-        int sx = (x0 < x1) ? 1 : -1; // шаг по x
-        int sy = (y0 < y1) ? 1 : -1; // шаг по y
-        boolean steep = (dy > dx); // определение наклона линии
+        int sx = (x0 < x1) ? 1 : -1;
+        int sy = (y0 < y1) ? 1 : -1;
+        boolean steep = (dy > dx);
 
-        // Если линия круче 45 градусов, меняем местами x и y
         if (steep) {
-            // Меняем местами x и y
             int temp = x0;
             x0 = y0;
             y0 = temp;
@@ -46,7 +44,7 @@ public class BresenhamAlgorithm {
 
         while (x0 != x1) {
             if (steep) {
-                points.add(new Point(y0, x0)); // добавляем точки в обратном порядке
+                points.add(new Point(y0, x0));
             } else {
                 points.add(new Point(x0, y0));
             }

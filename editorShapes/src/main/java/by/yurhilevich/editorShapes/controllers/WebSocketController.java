@@ -2,7 +2,7 @@ package by.yurhilevich.editorShapes.controllers;
 
 import by.yurhilevich.editorShapes.models.Point;
 import by.yurhilevich.editorShapes.services.BresenhamAlgorithm;
-import by.yurhilevich.editorShapes.services.NumericDiffAnalyzer;
+import by.yurhilevich.editorShapes.services.DigitalDifferentialAnalyzer;
 import by.yurhilevich.editorShapes.services.WuLineAlgorithm;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,32 +12,28 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
 @Controller
 public class WebSocketController {
 
-    @Autowired
-    BresenhamAlgorithm algorithm;
-
-    @Autowired
-    NumericDiffAnalyzer analyzer;
-
-    @Autowired
-    WuLineAlgorithm wuLineAlgorithm;
-
     private SimpMessagingTemplate messagingTemplate;
+    private final WuLineAlgorithm wuLineAlgorithm;
+    private final DigitalDifferentialAnalyzer digitalDifferentialAnalyzer;
+    private final BresenhamAlgorithm bresenhamAlgorithm;
 
-    // Внедряем SimpMessagingTemplate для отправки сообщений
     @Autowired
-    public WebSocketController(SimpMessagingTemplate messagingTemplate) {
+    public WebSocketController(SimpMessagingTemplate messagingTemplate, WuLineAlgorithm wuLineAlgorithm,
+                               DigitalDifferentialAnalyzer numericDiffAnalyzer, BresenhamAlgorithm bresenhamAlgorithm) {
         this.messagingTemplate = messagingTemplate;
+        this.wuLineAlgorithm = wuLineAlgorithm;
+        this.digitalDifferentialAnalyzer = numericDiffAnalyzer;
+        this.bresenhamAlgorithm = bresenhamAlgorithm;
     }
 
-    @MessageMapping("/draw")  // Принимаем данные от клиента
-    @SendTo("/topic/line")    // Отправляем их всем подписанным клиентам
+    @MessageMapping("/draw")
+    @SendTo("/topic/line")
     public List<Point> receivePoints(@RequestBody JsonNode jsonData) {
         System.out.println("websocket correct work");
         List<Point> result;
@@ -45,10 +41,10 @@ public class WebSocketController {
         System.out.println("Selected tool: " + tool);
 
         System.out.println("Selected algorithm: " + jsonData.get("alg").asText());
-        if (jsonData.get("alg").asText().equals("CDA")) {
-            result = analyzer.processing(jsonData);
+        if (jsonData.get("alg").asText().equals("DDA")) {
+            result = digitalDifferentialAnalyzer.processing(jsonData);
         } else if (jsonData.get("alg").asText().equals("Bresenham")) {
-            result = algorithm.drawLine(jsonData);
+            result = bresenhamAlgorithm.drawLine(jsonData);
         } else {
             result = wuLineAlgorithm.drawLine(jsonData);
         }

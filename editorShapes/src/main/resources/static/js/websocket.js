@@ -12,40 +12,35 @@ const colorInput = document.getElementById('lineColor');
 let stompClient = null;
 let points = [];
 let selectedTool = 'Pen';
-let selectAlgorithm = 'CDA';
+let selectAlgorithm = 'DDA';
 let debugMode = false;
 
-// Показываем или скрываем селектор алгоритма в зависимости от выбранного инструмента
+
 toolButtons.forEach((btn) => {
     btn.addEventListener('click', (event) => {
         selectedTool = event.target.getAttribute('data-tool');
 
         if (selectedTool === 'Line') {
-            algorithmSelector.style.display = 'inline-block'; // Показываем селектор алгоритма
+            algorithmSelector.style.display = 'inline-block';
         } else {
-            algorithmSelector.style.display = 'none'; // Скрываем селектор алгоритма
+            algorithmSelector.style.display = 'none';
         }
     });
 });
 
-// Очищаем холст и массив точек
 clearBtn.addEventListener('click', clearCanvas);
 
 function clearCanvas() {
     points = [];  // Очищаем массив точек
-    ctx.clearRect(0, 0, canvas.width, canvas.height);  // Очищаем сам канвас
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     logArea.value += "\n\n\n\n\n\n\nDEBUG MODE\n";
     logArea.scrollTop = logArea.scrollHeight;
     console.log('Canvas and points cleared');
 }
 
-
-
-// WebSocket connection
 function connect() {
     const socket = new SockJS('/lab1');
     stompClient = Stomp.over(socket);
-
     stompClient.connect({}, (frame) => {
         console.log('Connected: ' + frame);
         stompClient.subscribe('/topic/line', (message) => {
@@ -94,7 +89,7 @@ function drawPoint(x, y, alpha = 0.3) {
     if (selectedTool === 'Pen') {
         ctx.fillStyle = colorInput.value;
     } else {
-        if (selectAlgorithm === 'CDA') {
+        if (selectAlgorithm === 'DDA') {
             ctx.fillStyle = 'red';
         } else if (selectAlgorithm === 'Bresenham') {
             ctx.fillStyle = 'green';
@@ -108,7 +103,6 @@ function drawPoint(x, y, alpha = 0.3) {
     ctx.closePath();
 }
 
-// Обработка кликов по холсту
 canvas.addEventListener('click', (event) => {
     const rect = canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
@@ -125,25 +119,21 @@ canvas.addEventListener('click', (event) => {
         if (stompClient && stompClient.connected) {
             stompClient.send('/app/draw', {}, dataToSend);
         }
-        points = []; // Очищаем массив точек после отправки
+        points = [];
     }
 });
 
-// Обработка выбора алгоритма
 algorithmButtons.forEach((btn) => {
     btn.addEventListener('click', (event) => {
         selectAlgorithm = event.target.getAttribute('data-alg');
     });
 });
 
-// Обработка переключения режима
 toggleMode.addEventListener('change', () => {
     logArea.style.display = toggleMode.checked ? 'block' : 'none';
     debugMode = toggleMode.checked;
 });
 
-// Подключение к WebSocket при загрузке страницы
 window.addEventListener('load', connect);
 
-// Отключение WebSocket при закрытии страницы
 window.addEventListener('beforeunload', disconnect);

@@ -13,7 +13,6 @@ public class MainPageController {
 
     @GetMapping("/lab1")
     public String lab1Page() {
-//        return "FirstLab";
-        return "check";
+        return "Editor";
     }
 }

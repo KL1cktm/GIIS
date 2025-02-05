@@ -2,6 +2,7 @@ package by.yurhilevich.editorShapes.controllers;
 
 import by.yurhilevich.editorShapes.models.Point;
 import by.yurhilevich.editorShapes.services.BresenhamAlgorithm;
+import by.yurhilevich.editorShapes.services.BresenhamCircleAlgorithm;
 import by.yurhilevich.editorShapes.services.DigitalDifferentialAnalyzer;
 import by.yurhilevich.editorShapes.services.WuLineAlgorithm;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -12,6 +13,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -22,14 +24,17 @@ public class WebSocketController {
     private final WuLineAlgorithm wuLineAlgorithm;
     private final DigitalDifferentialAnalyzer digitalDifferentialAnalyzer;
     private final BresenhamAlgorithm bresenhamAlgorithm;
+    private final BresenhamCircleAlgorithm bresenhamCircleAlgorithm;
 
     @Autowired
     public WebSocketController(SimpMessagingTemplate messagingTemplate, WuLineAlgorithm wuLineAlgorithm,
-                               DigitalDifferentialAnalyzer numericDiffAnalyzer, BresenhamAlgorithm bresenhamAlgorithm) {
+                               DigitalDifferentialAnalyzer numericDiffAnalyzer, BresenhamAlgorithm bresenhamAlgorithm,
+                               BresenhamCircleAlgorithm bresenhamCircleAlgorithm) {
         this.messagingTemplate = messagingTemplate;
         this.wuLineAlgorithm = wuLineAlgorithm;
         this.digitalDifferentialAnalyzer = numericDiffAnalyzer;
         this.bresenhamAlgorithm = bresenhamAlgorithm;
+        this.bresenhamCircleAlgorithm = bresenhamCircleAlgorithm;
     }
 
     @MessageMapping("/draw")
@@ -47,6 +52,18 @@ public class WebSocketController {
             result = bresenhamAlgorithm.drawLine(jsonData);
         } else {
             result = wuLineAlgorithm.drawLine(jsonData);
+        }
+        return result;
+    }
+
+    @MessageMapping("/drawSecondLineOrder")
+    @SendTo("/topic/secondLineOrder")
+    public List<Point> receivePointsToSecondLine(@RequestBody JsonNode jsonData) {
+        System.out.println("websocket2 correct work");
+        List<Point> result = new ArrayList<>();
+        if (jsonData.get("figure").asText().equals("Circle")) {
+            result = bresenhamCircleAlgorithm.generateCircle(jsonData);
+            result.remove(0);
         }
         return result;
     }

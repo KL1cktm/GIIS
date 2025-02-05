@@ -19,6 +19,34 @@ function disconnect() {
     }
 }
 
-window.addEventListener('load', connect);
+let stompClient1 = null;
 
-window.addEventListener('beforeunload', disconnect);
+function connect1() {
+    const socket = new SockJS('/lab1');
+    stompClient1 = Stomp.over(socket);
+    stompClient1.connect({}, (frame) => {
+        console.log('Connected: ' + frame);
+        stompClient1.subscribe('/topic/secondLineOrder', (message) => {
+            const pointsFromServer = JSON.parse(message.body);
+            checkDebugMode(pointsFromServer);
+            console.log('Received points from server');
+        });
+    });
+}
+
+function disconnect1() {
+    if (stompClient1 !== null) {
+        stompClient1.disconnect();
+    }
+}
+
+window.addEventListener('load', () => {
+    connect();
+    connect1();
+});
+
+
+window.addEventListener('beforeunload', () => {
+   disconnect();
+   disconnect1();
+});

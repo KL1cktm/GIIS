@@ -1,6 +1,11 @@
 toggleMode.addEventListener('change', () => {
     logArea.style.display = toggleMode.checked ? 'block' : 'none';
     debugMode = toggleMode.checked;
+    if (debugMode) {
+        printGrid();
+    } else {
+        clearCanvas();
+    }
 });
 
 function writeLog(point) {
@@ -17,14 +22,39 @@ function writeLog(point) {
 
 function checkDebugMode(points) {
     console.log("debug: " + debugMode);
-    if (debugMode) {
-        points.forEach((point, index) => {
-            setTimeout(function() {
-                drawPoint(point.x, point.y, point.alpha);
-                writeLog(point);
-            }, index * 10);
-        });
-    } else {
+    if (selectedTool === 'Pen' || selectedTool === 'Line') {
+        if (debugMode) {
+            points.forEach((point, index) => {
+                setTimeout(function() {
+                    drawPoint(point.x, point.y, point.alpha);
+                    writeLog(point);
+                }, index * 10);
+            });
+        } else {
+            points.forEach(point => drawPoint(point.x, point.y, point.alpha));
+        }
+    } else if (selectedTool === 'Line2') {
+        console.log('Line2 work correctly')
         points.forEach(point => drawPoint(point.x, point.y, point.alpha));
+    }
+}
+
+function printGrid() {
+    const step = 20;
+    ctx.strokeStyle = "#ccc";
+    ctx.lineWidth = 0.5;
+
+    for (let x = 0; x <= canvas.width; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+    }
+
+    for (let y = 0; y <= canvas.height; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
     }
 }

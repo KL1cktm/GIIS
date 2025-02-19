@@ -22,19 +22,14 @@ function writeLog(point) {
 
 function checkDebugMode(points) {
     console.log("debug: " + debugMode);
-    if (selectedTool === 'Pen' || selectedTool === 'Line') {
-        if (debugMode) {
-            points.forEach((point, index) => {
-                setTimeout(function() {
-                    drawPoint(point.x, point.y, point.alpha);
-                    writeLog(point);
-                }, index * 10);
-            });
-        } else {
-            points.forEach(point => drawPoint(point.x, point.y, point.alpha));
-        }
-    } else if (selectedTool === 'Line2') {
-        console.log('Line2 work correctly')
+    if (debugMode) {
+        points.forEach((point, index) => {
+            setTimeout(function() {
+                drawPoint(point.x, point.y, point.alpha);
+                writeLog(point);
+            }, index * 10);
+        });
+    } else {
         points.forEach(point => drawPoint(point.x, point.y, point.alpha));
     }
 }

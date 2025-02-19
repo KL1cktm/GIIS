@@ -186,11 +186,15 @@
       </button>
       <ul class="dropdown-menu" aria-labelledby="algorithmSelector">
         <li><a class="dropdown-item" href="#" data-alg="Circle">Circle</a></li>
-        <li><a class="dropdown-item" href="#" data-alg="X">X</a></li>
-        <li><a class="dropdown-item" href="#" data-alg="Y">Y</a></li>
+        <li><a class="dropdown-item" href="#" data-alg="Ellipse">Ellipse</a></li>
+        <li><a class="dropdown-item" href="#" data-alg="Hyperbola">Hyperbola</a></li>
+        <li><a class="dropdown-item" href="#" data-alg="Parabola">Parabola</a></li>
       </ul>
     </div>
     <button class="btn btn-primary" id="openSidebar" style="display: none; width: 180px;">Settings</button>
+    <button class="btn btn-primary" id="openSidebarEllipse" style="display: none; width: 180px;">Settings</button>
+    <button class="btn btn-primary" id="openSidebarHyperbola" style="display: none; width: 180px;">Settings</button>
+    <button class="btn btn-primary" id="openSidebarParabola" style="display: none; width: 180px;">Settings</button>
     <div class="color-picker-container">
       <label for="lineColor" class="color-picker-label">Pen Color</label>
       <input type="color" id="lineColor" name="lineColor" value="#000000" class="color-picker-input">
@@ -222,6 +226,53 @@
     <label for="param1" class="form-label">Радиус:</label>
     <input type="text" id="param1" class="form-control" value="10">
     <button class="btn btn-primary mt-3" id="saveParams">Сохранить</button>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end" id="paramSidebarEllipse" tabindex="-1" aria-labelledby="paramSidebarLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="paramSidebarLabelEllipse">Параметры инструмента</h5>
+    <button type="button" class="btn-close" id="closeSidebarEllipse"></button>
+  </div>
+  <div class="offcanvas-body">
+    <label for="param21" class="form-label">Большая полуось:</label>
+    <input type="text" id="param21" class="form-control" value="10">
+    <label for="param22" class="form-label">Малая полуось:</label>
+    <input type="text" id="param22" class="form-control" value="5">
+    <button class="btn btn-primary mt-3" id="saveParamsEllipse">Сохранить</button>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end" id="paramSidebarHyperbola" tabindex="-1" aria-labelledby="paramSidebarLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="paramSidebarLabelHyperbola">Параметры инструмента</h5>
+    <button type="button" class="btn-close" id="closeSidebarHyperbola"></button>
+  </div>
+  <div class="offcanvas-body">
+    <label for="param21" class="form-label">Полуось по Х:</label>
+    <input type="text" id="param31" class="form-control" value="25">
+    <label for="param22" class="form-label">Полуось по Y:</label>
+    <input type="text" id="param32" class="form-control" value="35">
+    <label for="param22" class="form-label">Вертикально:</label>
+    <input type="text" id="param33" class="form-control" value="true">
+    <button class="btn btn-primary mt-3" id="saveParamsHyperbola">Сохранить</button>
+  </div>
+</div>
+
+
+<div class="offcanvas offcanvas-end" id="paramSidebarParabola" tabindex="-1" aria-labelledby="paramSidebarLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="paramSidebarLabelParabola">Параметры инструмента</h5>
+    <button type="button" class="btn-close" id="closeSidebarParabola"></button>
+  </div>
+  <div class="offcanvas-body">
+    <label for="param21" class="form-label">Коэфициент растяжения:</label>
+    <input type="text" id="param41" class="form-control" value="0.3">
+    <label for="param22" class="form-label">Степень кривизны:</label>
+    <input type="text" id="param42" class="form-control" value="1.6">
+    <label for="param22" class="form-label">Ветви вертикально:</label>
+    <input type="text" id="param43" class="form-control" value="true">
+    <button class="btn btn-primary mt-3" id="saveParamsParabola">Сохранить</button>
   </div>
 </div>
 

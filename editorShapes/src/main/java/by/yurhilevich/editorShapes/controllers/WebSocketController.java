@@ -2,7 +2,7 @@ package by.yurhilevich.editorShapes.controllers;
 
 import by.yurhilevich.editorShapes.models.Point;
 import by.yurhilevich.editorShapes.services.BresenhamAlgorithm;
-import by.yurhilevich.editorShapes.services.BresenhamCircleAlgorithm;
+import by.yurhilevich.editorShapes.services.LineSecondOrderAlgorithm;
 import by.yurhilevich.editorShapes.services.DigitalDifferentialAnalyzer;
 import by.yurhilevich.editorShapes.services.WuLineAlgorithm;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,17 +24,17 @@ public class WebSocketController {
     private final WuLineAlgorithm wuLineAlgorithm;
     private final DigitalDifferentialAnalyzer digitalDifferentialAnalyzer;
     private final BresenhamAlgorithm bresenhamAlgorithm;
-    private final BresenhamCircleAlgorithm bresenhamCircleAlgorithm;
+    private final LineSecondOrderAlgorithm lineSecondOrderAlgorithm;
 
     @Autowired
     public WebSocketController(SimpMessagingTemplate messagingTemplate, WuLineAlgorithm wuLineAlgorithm,
                                DigitalDifferentialAnalyzer numericDiffAnalyzer, BresenhamAlgorithm bresenhamAlgorithm,
-                               BresenhamCircleAlgorithm bresenhamCircleAlgorithm) {
+                               LineSecondOrderAlgorithm lineSecondOrderAlgorithm) {
         this.messagingTemplate = messagingTemplate;
         this.wuLineAlgorithm = wuLineAlgorithm;
         this.digitalDifferentialAnalyzer = numericDiffAnalyzer;
         this.bresenhamAlgorithm = bresenhamAlgorithm;
-        this.bresenhamCircleAlgorithm = bresenhamCircleAlgorithm;
+        this.lineSecondOrderAlgorithm = lineSecondOrderAlgorithm;
     }
 
     @MessageMapping("/draw")
@@ -61,8 +61,19 @@ public class WebSocketController {
     public List<Point> receivePointsToSecondLine(@RequestBody JsonNode jsonData) {
         System.out.println("websocket2 correct work");
         List<Point> result = new ArrayList<>();
+        System.out.println(jsonData.get("figure").asText());
+        System.out.println(jsonData.get("figure").asText().equals("Circle"));
         if (jsonData.get("figure").asText().equals("Circle")) {
-            result = bresenhamCircleAlgorithm.generateCircle(jsonData);
+            result = lineSecondOrderAlgorithm.generateCircle(jsonData);
+            result.remove(0);
+        } else if (jsonData.get("figure").asText().equals("Ellipse")) {
+            result = lineSecondOrderAlgorithm.generateEllipse(jsonData);
+            result.remove(0);
+        } else if (jsonData.get("figure").asText().equals("Hyperbola")) {
+            result = lineSecondOrderAlgorithm.generateHyperbola(jsonData);
+            result.remove(0);
+        } else {
+            result = lineSecondOrderAlgorithm.generateParabola(jsonData);
             result.remove(0);
         }
         return result;

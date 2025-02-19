@@ -1,23 +1,104 @@
 document.addEventListener("DOMContentLoaded", function () {
     const dropdownItems = document.querySelectorAll(".dropdown-item");
     const sidebarCircle = new bootstrap.Offcanvas(document.getElementById("paramSidebarCircle"));
+    const sidebarEllipse = new bootstrap.Offcanvas(document.getElementById("paramSidebarEllipse"));
+    const sidebarHyperbola = new bootstrap.Offcanvas(document.getElementById("paramSidebarHyperbola"));
+    const sidebarParabola = new bootstrap.Offcanvas(document.getElementById("paramSidebarParabola"));
     const closeSidebarBtn = document.getElementById("closeSidebar");
+    const closeSidebarEllipseBtn = document.getElementById("closeSidebarEllipse");
+    const closeSidebarHyperbolaBtn = document.getElementById("closeSidebarHyperbola");
+    const closeSidebarParabolaBtn = document.getElementById("closeSidebarParabola");
     const openSidebarBtn = document.getElementById("openSidebar");
+    const openSidebarEllipseBtn = document.getElementById("openSidebarEllipse");
+    const openSidebarHyperbolaBtn = document.getElementById("openSidebarHyperbola");
+    const openSidebarParabolaBtn = document.getElementById("openSidebarParabola");
 
     dropdownItems.forEach(item => {
         item.addEventListener("click", function (event) {
+            openSidebarBtn.style.display = "none";
+            openSidebarEllipseBtn.style.display = "none";
+            openSidebarHyperbolaBtn.style.display = "none";
+            openSidebarParabolaBtn.style.display = "none";
             event.preventDefault();
-            const algorithm = this.dataset.alg;
-            console.log(algorithm);
+            selectLine2 = this.dataset.alg;
+            console.log(selectLine2)
 
-            if (algorithm === "Circle") {
+            if (selectLine2 === "Circle") {
                 radius = 10;
                 sidebarCircle.show();
                 openSidebarBtn.style.display = "none";
             } else {
                 sidebarCircle.hide();
             }
+            if (selectLine2 === "Ellipse") {
+                sidebarEllipse.show();
+            }
+            if (selectLine2 === "Hyperbola") {
+                sidebarHyperbola.show();
+            }
+            if (selectLine2 === "Parabola") {
+                sidebarParabola.show();
+            }
         });
+    });
+
+    closeSidebarParabolaBtn.addEventListener("click", function () {
+        sidebarParabola.hide();
+    });
+
+    openSidebarParabolaBtn.addEventListener("click", function () {
+        sidebarParabola.show();
+        openSidebarParabolaBtn.style.display = "none";
+    });
+
+    document.getElementById("paramSidebarParabola").addEventListener("hidden.bs.offcanvas", function () {
+        openSidebarParabolaBtn.style.display = "block";
+    });
+
+    document.getElementById("saveParamsParabola").addEventListener("click", function () {
+        a = document.getElementById("param41").value;
+        b = document.getElementById("param42").value;
+        position = document.getElementById("param43").value;
+        console.log(`Полуоси: ${a}, ${b}. Положение: ${position}`);
+    });
+
+    closeSidebarHyperbolaBtn.addEventListener("click", function () {
+        sidebarHyperbola.hide();
+    });
+
+    openSidebarHyperbolaBtn.addEventListener("click", function () {
+        sidebarHyperbola.show();
+        openSidebarHyperbolaBtn.style.display = "none";
+    });
+
+    document.getElementById("paramSidebarHyperbola").addEventListener("hidden.bs.offcanvas", function () {
+        openSidebarHyperbolaBtn.style.display = "block";
+    });
+
+    document.getElementById("saveParamsHyperbola").addEventListener("click", function () {
+        a = document.getElementById("param31").value;
+        b = document.getElementById("param32").value;
+        position = document.getElementById("param33").value;
+        console.log(`Полуоси: ${a}, ${b}. Положение: ${position}`);
+    });
+
+    closeSidebarEllipseBtn.addEventListener("click", function () {
+        sidebarEllipse.hide();
+    });
+
+    openSidebarEllipseBtn.addEventListener("click", function () {
+        sidebarEllipse.show();
+        openSidebarEllipseBtn.style.display = "none";
+    });
+
+    document.getElementById("paramSidebarEllipse").addEventListener("hidden.bs.offcanvas", function () {
+        openSidebarEllipseBtn.style.display = "block";
+    });
+
+    document.getElementById("saveParamsEllipse").addEventListener("click", function () {
+        a = document.getElementById("param21").value;
+        b = document.getElementById("param22").value;
+        console.log(`Полуоси: ${a}, ${b}`);
     });
 
     closeSidebarBtn.addEventListener("click", function () {

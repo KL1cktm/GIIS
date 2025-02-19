@@ -17,3 +17,6 @@ let selectAlgorithm = 'DDA';
 let selectLine2 = 'Circle';
 let debugMode = false;
 let radius = 10;
+let a = 10;
+let b = 5;
+let position = true;

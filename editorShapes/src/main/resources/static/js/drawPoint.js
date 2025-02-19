@@ -13,8 +13,16 @@ function drawPoint(x, y, alpha) {
         } else {
             ctx.fillStyle = 'black';
         }
-    } else {
-        ctx.fillStyle = 'Aquamarine';
+    } else if (selectedTool === "Line2"){
+        if (selectLine2 === "Circle") {
+            ctx.fillStyle = 'Aquamarine';
+        } else if (selectLine2 === "Ellipse") {
+            ctx.fillStyle = 'Chartreuse';
+        } else if (selectLine2 === "Hyperbola") {
+            ctx.fillStyle = 'DarkMagenta';
+        } else {
+            ctx.fillStyle = 'BurlyWood';
+        }
     }
     ctx.fill();
     ctx.closePath();
@@ -33,7 +41,20 @@ canvas.addEventListener('click', (event) => {
 
 function secondTools(x, y) {
     points.push({ x, y });
-    const dataToSend = JSON.stringify({ points, figure: selectLine2, radius: radius });
+    if (selectLine2 === undefined) {
+        selectLine2 = "Circle";
+    }
+    let dataToSend;
+    console.log(selectLine2)
+    if (selectLine2 === "Circle") {
+        dataToSend = JSON.stringify({ points, figure: selectLine2, radius: radius });
+    } else if (selectLine2 === "Ellipse") {
+        dataToSend = JSON.stringify({ points, figure: selectLine2, a: a, b: b });
+    } else if (selectLine2 === "Hyperbola") {
+        dataToSend = JSON.stringify({ points, figure: selectLine2, a: a, b: b, position: position });
+    } else {
+        dataToSend = JSON.stringify({ points, figure: selectLine2, a: a, b: b, position: position });
+    }
     if (stompClient && stompClient.connected) {
         stompClient.send('/app/drawSecondLineOrder', {}, dataToSend);
     }
@@ -48,6 +69,9 @@ function basicTools(x, y) {
     drawPoint(x, y);
 
     if (points.length === 2) {
+        if (selectAlgorithm === undefined) {
+            selectAlgorithm = "DDA";
+        }
         const dataToSend = JSON.stringify({ tool: selectedTool, points, alg: selectAlgorithm });
         if (stompClient && stompClient.connected) {
             stompClient.send('/app/draw', {}, dataToSend);

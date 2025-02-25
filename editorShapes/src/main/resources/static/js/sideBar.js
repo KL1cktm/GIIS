@@ -1,7 +1,24 @@
 toolButtons.forEach((btn) => {
     btn.addEventListener('click', (event) => {
         selectedTool = event.target.getAttribute('data-tool');
+        if (selectedTool === 'Curve') {
+            algorithmSelectorCurve.style.display = 'inline-block';
+        } else {
+            algorithmSelectorCurve.style.display = 'none';
+        }
+    });
+});
 
+curveToolButtons.forEach((btn) => {
+    btn.addEventListener('click', (event) => {
+        selectCurveLine = event.target.getAttribute('data-tool-2');
+        console.log(selectCurveLine);
+    });
+});
+
+toolButtons.forEach((btn) => {
+    btn.addEventListener('click', (event) => {
+        selectedTool = event.target.getAttribute('data-tool');
         if (selectedTool === 'Line') {
             algorithmSelector.style.display = 'inline-block';
         } else {

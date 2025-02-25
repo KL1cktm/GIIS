@@ -1,5 +1,7 @@
 let stompClient = null;
 
+
+
 function connect() {
     const socket = new SockJS('/lab1');
     stompClient = Stomp.over(socket);
@@ -40,13 +42,38 @@ function disconnect1() {
     }
 }
 
+let stompClient2 = null;
+
+function connect2() {
+    const socket = new SockJS('/lab1');
+    console.log("Socket connected!");
+    stompClient2 = Stomp.over(socket);
+    stompClient2.connect({}, (frame) => {
+        console.log('Connected: ' + frame);
+        stompClient2.subscribe('/topic/curveLine', (message) => {
+            const pointsFromServer = JSON.parse(message.body);
+            console.log(pointsFromServer);
+            checkDebugMode(pointsFromServer);
+            console.log('Received points from server');
+        });
+    });
+}
+
+function disconnect2() {
+    if (stompClient2 !== null) {
+        stompClient2.disconnect();
+    }
+}
+
 window.addEventListener('load', () => {
     connect();
     connect1();
+    connect2();
 });
 
 
 window.addEventListener('beforeunload', () => {
    disconnect();
    disconnect1();
+   disconnect2();
 });

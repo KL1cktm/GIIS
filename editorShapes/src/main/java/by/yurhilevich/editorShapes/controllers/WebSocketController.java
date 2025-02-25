@@ -1,10 +1,7 @@
 package by.yurhilevich.editorShapes.controllers;
 
 import by.yurhilevich.editorShapes.models.Point;
-import by.yurhilevich.editorShapes.services.BresenhamAlgorithm;
-import by.yurhilevich.editorShapes.services.LineSecondOrderAlgorithm;
-import by.yurhilevich.editorShapes.services.DigitalDifferentialAnalyzer;
-import by.yurhilevich.editorShapes.services.WuLineAlgorithm;
+import by.yurhilevich.editorShapes.services.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -25,16 +22,18 @@ public class WebSocketController {
     private final DigitalDifferentialAnalyzer digitalDifferentialAnalyzer;
     private final BresenhamAlgorithm bresenhamAlgorithm;
     private final LineSecondOrderAlgorithm lineSecondOrderAlgorithm;
+    private final ParametricCurvesService parametricCurvesService;
 
     @Autowired
     public WebSocketController(SimpMessagingTemplate messagingTemplate, WuLineAlgorithm wuLineAlgorithm,
                                DigitalDifferentialAnalyzer numericDiffAnalyzer, BresenhamAlgorithm bresenhamAlgorithm,
-                               LineSecondOrderAlgorithm lineSecondOrderAlgorithm) {
+                               LineSecondOrderAlgorithm lineSecondOrderAlgorithm, ParametricCurvesService parametricCurvesService) {
         this.messagingTemplate = messagingTemplate;
         this.wuLineAlgorithm = wuLineAlgorithm;
         this.digitalDifferentialAnalyzer = numericDiffAnalyzer;
         this.bresenhamAlgorithm = bresenhamAlgorithm;
         this.lineSecondOrderAlgorithm = lineSecondOrderAlgorithm;
+        this.parametricCurvesService = parametricCurvesService;
     }
 
     @MessageMapping("/draw")
@@ -75,6 +74,25 @@ public class WebSocketController {
         } else {
             result = lineSecondOrderAlgorithm.generateParabola(jsonData);
             result.remove(0);
+        }
+        return result;
+    }
+
+    @MessageMapping("/drawCurveLineOrder")
+    @SendTo("/topic/curveLine")
+    public List<Point> receivePointsToCurveLine(@RequestBody JsonNode jsonData) {
+        System.out.println("websocket3 correct work");
+        List<Point> result = new ArrayList<>();
+        System.out.println(jsonData.get("figure").asText());
+        if (jsonData.get("figure").asText().equals("Hermite")) {
+            result = parametricCurvesService.generateHermiteCurve(jsonData);
+        } else if (jsonData.get("figure").asText().equals("B-spline")) {
+            result = parametricCurvesService.generateBSplineCurve(jsonData);
+        } else {
+            result = parametricCurvesService.generateBezierCurve(jsonData);
+        }
+        for (Point p : result) {
+            System.out.println(p.getX() + " " + p.getY());
         }
         return result;
     }

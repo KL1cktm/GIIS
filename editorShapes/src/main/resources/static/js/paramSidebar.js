@@ -4,14 +4,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const sidebarEllipse = new bootstrap.Offcanvas(document.getElementById("paramSidebarEllipse"));
     const sidebarHyperbola = new bootstrap.Offcanvas(document.getElementById("paramSidebarHyperbola"));
     const sidebarParabola = new bootstrap.Offcanvas(document.getElementById("paramSidebarParabola"));
+    const sidebarBSpline = new bootstrap.Offcanvas(document.getElementById("paramSidebarBSpline"));
     const closeSidebarBtn = document.getElementById("closeSidebar");
     const closeSidebarEllipseBtn = document.getElementById("closeSidebarEllipse");
     const closeSidebarHyperbolaBtn = document.getElementById("closeSidebarHyperbola");
     const closeSidebarParabolaBtn = document.getElementById("closeSidebarParabola");
+    const closeSidebarBSplineBtn = document.getElementById("closeSidebarBSpline");
     const openSidebarBtn = document.getElementById("openSidebar");
     const openSidebarEllipseBtn = document.getElementById("openSidebarEllipse");
     const openSidebarHyperbolaBtn = document.getElementById("openSidebarHyperbola");
     const openSidebarParabolaBtn = document.getElementById("openSidebarParabola");
+    const openSidebarBSplineBtn = document.getElementById("openSidebarBSpline");
 
     dropdownItems.forEach(item => {
         item.addEventListener("click", function (event) {
@@ -19,9 +22,11 @@ document.addEventListener("DOMContentLoaded", function () {
             openSidebarEllipseBtn.style.display = "none";
             openSidebarHyperbolaBtn.style.display = "none";
             openSidebarParabolaBtn.style.display = "none";
+            openSidebarBSplineBtn.style.display = "none";
             event.preventDefault();
             selectLine2 = this.dataset.alg;
-            console.log(selectLine2)
+            console.log("select line2&  " + selectLine2);
+            console.log("select curveline2&  " + selectCurveLine);
 
             if (selectLine2 === "Circle") {
                 radius = 10;
@@ -39,7 +44,29 @@ document.addEventListener("DOMContentLoaded", function () {
             if (selectLine2 === "Parabola") {
                 sidebarParabola.show();
             }
+            if (selectLine2 === "B-spline") {
+                sidebarBSpline.show();
+            }
         });
+    });
+
+    closeSidebarBSplineBtn.addEventListener("click", function () {
+        sidebarBSpline.hide();
+    });
+
+    openSidebarBSplineBtn.addEventListener("click", function () {
+        sidebarBSpline.show();
+        openSidebarBSplineBtn.style.display = "none";
+    });
+
+    document.getElementById("paramSidebarBSpline").addEventListener("hidden.bs.offcanvas", function () {
+        openSidebarBSplineBtn.style.display = "block";
+    });
+
+    document.getElementById("saveParamsBSpline").addEventListener("click", function () {
+        numberOfPoints = document.getElementById("param51").value;
+        degree = document.getElementById("param52").value;
+        console.log(`Число точек ${numberOfPoints}   Степень   ${degree}`);
     });
 
     closeSidebarParabolaBtn.addEventListener("click", function () {

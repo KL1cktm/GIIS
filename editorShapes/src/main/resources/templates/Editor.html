@@ -152,6 +152,9 @@
     #ElementSelectorSecond {
       display: none;
     }
+    #ElementSelectorCurve {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -168,6 +171,7 @@
         <li><a class="dropdown-item" href="#" data-tool="Pen">Pen</a></li>
         <li><a class="dropdown-item" href="#" data-tool="Line">Line</a></li>
         <li><a class="dropdown-item" href="#" data-tool="Line2">2-order line</a></li>
+        <li><a class="dropdown-item" href="#" data-tool="Curve">Curve line</a></li>
       </ul>
     </div>
     <div class="dropdown">
@@ -191,10 +195,22 @@
         <li><a class="dropdown-item" href="#" data-alg="Parabola">Parabola</a></li>
       </ul>
     </div>
+    <div class="dropdown">
+      <button class="btn btn-primary dropdown-toggle" type="button" id="ElementSelectorCurve" data-bs-toggle="dropdown"
+              aria-expanded="false" style="width: 180px;">
+        Select Form
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="algorithmSelector">
+        <li><a class="dropdown-item" href="#" data-alg="Hermite">Hermite</a></li>
+        <li><a class="dropdown-item" href="#" data-alg="Beziers">Beziers</a></li>
+        <li><a class="dropdown-item" href="#" data-alg="B-spline">B-spline</a></li>
+      </ul>
+    </div>
     <button class="btn btn-primary" id="openSidebar" style="display: none; width: 180px;">Settings</button>
     <button class="btn btn-primary" id="openSidebarEllipse" style="display: none; width: 180px;">Settings</button>
     <button class="btn btn-primary" id="openSidebarHyperbola" style="display: none; width: 180px;">Settings</button>
     <button class="btn btn-primary" id="openSidebarParabola" style="display: none; width: 180px;">Settings</button>
+    <button class="btn btn-primary" id="openSidebarBSpline" style="display: none; width: 180px;">Settings</button>
     <div class="color-picker-container">
       <label for="lineColor" class="color-picker-label">Pen Color</label>
       <input type="color" id="lineColor" name="lineColor" value="#000000" class="color-picker-input">
@@ -276,6 +292,19 @@
   </div>
 </div>
 
+<div class="offcanvas offcanvas-end" id="paramSidebarBSpline" tabindex="-1" aria-labelledby="paramSidebarLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="paramSidebarLabelBSpline">Параметры инструмента</h5>
+    <button type="button" class="btn-close" id="closeSidebarBSpline"></button>
+  </div>
+  <div class="offcanvas-body">
+    <label for="param21" class="form-label">Количество точек:</label>
+    <input type="text" id="param51" class="form-control" value="4">
+    <label for="param22" class="form-label">Степень:</label>
+    <input type="text" id="param52" class="form-control" value="3">
+    <button class="btn btn-primary mt-3" id="saveParamsBSpline">Сохранить</button>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>

@@ -4,11 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
   <title>Canvas Example</title>
-  <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
   <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
   <link href="/css/styles.css" rel="stylesheet" />
   <style>
     body {
@@ -163,6 +162,7 @@
   <div>
     <h2>EDITOR</h2>
     <button class="btn btn-primary" id="clearCanvas" style="width: 180px;">Clear Canvas</button>
+    <button class="btn btn-warning text-white" id="changeCoords" style="width: 180px;">3D Mode</button>
     <div class="dropdown">
       <button class="btn btn-primary dropdown-toggle" type="button" id="toolSelector" data-bs-toggle="dropdown" aria-expanded="false" style="width: 180px;">
         Select Tool
@@ -306,14 +306,14 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script src="/js/sockjs.min.js"></script>
+<script src="/js/stomp.min.js"></script>
 <script src="/js/variables.js"></script>
 <script src="/js/websocket.js"></script>
 <script src="/js/sideBar.js"></script>
 <script src="/js/drawPoint.js"></script>
 <script src="/js/debugMode.js"></script>
 <script src="/js/paramSidebar.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

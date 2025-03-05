@@ -1,6 +1,7 @@
 package by.yurhilevich.editorShapes.controllers;
 
 import by.yurhilevich.editorShapes.models.Point;
+import by.yurhilevich.editorShapes.models.Point3D;
 import by.yurhilevich.editorShapes.services.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,17 +24,24 @@ public class WebSocketController {
     private final BresenhamAlgorithm bresenhamAlgorithm;
     private final LineSecondOrderAlgorithm lineSecondOrderAlgorithm;
     private final ParametricCurvesService parametricCurvesService;
+    private final Transformation transformation;
+    private List<Point3D> vertices;
+    private double angleX = 0;
+    private double angleY = 0;
+    private double angleZ = 0;
+    private double distance = 100;
 
     @Autowired
     public WebSocketController(SimpMessagingTemplate messagingTemplate, WuLineAlgorithm wuLineAlgorithm,
                                DigitalDifferentialAnalyzer numericDiffAnalyzer, BresenhamAlgorithm bresenhamAlgorithm,
-                               LineSecondOrderAlgorithm lineSecondOrderAlgorithm, ParametricCurvesService parametricCurvesService) {
+                               LineSecondOrderAlgorithm lineSecondOrderAlgorithm, ParametricCurvesService parametricCurvesService, Transformation transformation) {
         this.messagingTemplate = messagingTemplate;
         this.wuLineAlgorithm = wuLineAlgorithm;
         this.digitalDifferentialAnalyzer = numericDiffAnalyzer;
         this.bresenhamAlgorithm = bresenhamAlgorithm;
         this.lineSecondOrderAlgorithm = lineSecondOrderAlgorithm;
         this.parametricCurvesService = parametricCurvesService;
+        this.transformation = transformation;
     }
 
     @MessageMapping("/draw")
@@ -95,5 +103,88 @@ public class WebSocketController {
             System.out.println(p.getX() + " " + p.getY());
         }
         return result;
+    }
+
+    @MessageMapping("/3dMode")
+    @SendTo("/topic/3dMode")
+    public List<Point3D> receivePointsTo3dMode(@RequestBody JsonNode jsonData) {
+        System.out.println("websocket4 correct work");
+        List<Point3D> result = new ArrayList<>();
+        System.out.println(jsonData.get("method").asText());
+        if (jsonData.get("method").asText().equals("translate")) {
+            if (jsonData.has("variable")) {
+                result = transformation.translate(this.vertices,jsonData.get("variable").asText(),jsonData.get("value").asDouble());
+            } else {
+                result = transformation.translate(this.vertices,jsonData.get("tx").asDouble(),jsonData.get("ty").asDouble(),jsonData.get("tz").asDouble());
+            }
+            this.vertices = result;
+        } else if (jsonData.get("method").asText().equals("scale")) {
+            result = this.vertices;
+        } else if (jsonData.get("method").asText().equals("rotate")) {
+            if (jsonData.has("keyboard")) {
+                if (jsonData.get("axis").asText().equals("x")) {
+                    this.angleX += jsonData.get("angle").asDouble();
+                    result = transformation.rotate(this.vertices,jsonData.get("axis").asText(),this.angleX);
+                } else if (jsonData.get("axis").asText().equals("y")) {
+                    this.angleY += jsonData.get("angle").asDouble();
+                    result = transformation.rotate(this.vertices,jsonData.get("axis").asText(),this.angleY);
+                } else if (jsonData.get("axis").asText().equals("z")) {
+                    this.angleZ += jsonData.get("angle").asDouble();
+                    result = transformation.rotate(this.vertices,jsonData.get("axis").asText(),this.angleZ);
+                }
+            } else {
+                if (jsonData.get("axis").asText().equals("x")) {
+                    this.angleX = jsonData.get("angle").asDouble();
+                    result = transformation.rotate(this.vertices,jsonData.get("axis").asText(),this.angleX);
+                } else if (jsonData.get("axis").asText().equals("y")) {
+                    this.angleY = jsonData.get("angle").asDouble();
+                    result = transformation.rotate(this.vertices,jsonData.get("axis").asText(),this.angleY);
+                } else if (jsonData.get("axis").asText().equals("z")) {
+                    this.angleZ = jsonData.get("angle").asDouble();
+                    result = transformation.rotate(this.vertices,jsonData.get("axis").asText(),this.angleZ);
+                }
+            }
+            System.out.println(this.angleX+" "+this.angleY +" "+this.angleZ);
+        } else if (jsonData.get("method").asText().equals("reflect")) {
+            result = transformation.reflect(this.vertices,jsonData.get("plane").asText());
+        } else if (jsonData.get("method").asText().equals("perspective")) {
+            if (jsonData.has("keyboard")) {
+                distance = jsonData.get("distance").asDouble();
+                result = transformation.perspective(this.vertices, distance);
+            } else {
+                distance += jsonData.get("distance").asDouble();
+                System.out.println(distance);
+                result = transformation.perspective(this.vertices, distance);
+            }
+        }
+        return result;
+    }
+
+    @MessageMapping("/uploadFile")
+    @SendTo("/topic/3dMode")
+    public List<Point3D> handleFileUpload(String fileContent) {
+        System.out.println("Получено содержимое файла: \n" + fileContent);
+        this.vertices = parseFileContent(fileContent);
+        return vertices;
+    }
+
+    private List<Point3D> parseFileContent(String fileContent) {
+        List<Point3D> vertices = new ArrayList<>();
+        String[] lines = fileContent.split("\n");
+
+        for (String line : lines) {
+            line = line.trim();
+            if (!line.isEmpty() && !line.startsWith("#")) {
+                String[] coords = line.split("\\s+");
+                if (coords.length == 3) {
+                    double x = Double.parseDouble(coords[0]);
+                    double y = Double.parseDouble(coords[1]);
+                    double z = Double.parseDouble(coords[2]);
+                    vertices.add(new Point3D(x, y, z));
+                }
+            }
+        }
+
+        return vertices;
     }
 }

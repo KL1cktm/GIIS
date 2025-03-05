@@ -18,6 +18,6 @@ public class MainPageController {
 
     @GetMapping("/lab2")
     public String lab2Page() {
-        return "Editor";
+        return "3dMode";
     }
 }

@@ -148,6 +148,218 @@ public List<Point> generateParabola(JsonNode jsonData) {
 
 </details>
 
+<details>
+  <summary>Лаб 3</summary>
+  
+## Цель
+Разработать элементарный графический редактор, реализующий построение параметрических кривых, используя форму Эрмита, форму Безье и B-сплайн. Выбор метода задается из пункта меню и доступен через панель инструментов «Кривые». В редакторе должен быть предусмотрен режим корректировки опорных точек и состыковки сегментов. В программной реализации необходимо реализовать базовые функции матричных вычислений.
+
+## Описание алгоритмов
+### Алгоритм построения кривой Эрмита
+Кривая Эрмита — это параметрическая кривая, которая задается двумя точками (начало и конец кривой) и двумя касательными векторами в этих точках. Она позволяет плавно интерполировать между двумя точками, учитывая направление и скорость изменения кривой в этих точка
+
+### Алгоритм построения кривой Безье
+Кривая Безье — это параметрическая кривая, которая задается набором контрольных точек. В вашем случае используется кубическая кривая Безье, которая требует четыре контрольные точки. Кривая Безье плавно интерполирует между этими точками, создавая гладкую форму.
+
+### Алгоритм построения B-сплайна
+B-сплайн — это более гибкая параметрическая кривая, которая задается набором контрольных точек и узловым вектором. Узловой вектор определяет, как контрольные точки влияют на форму кривой. B-сплайн позволяет создавать сложные кривые с высокой степенью гладкости.
+
+## Интерфейс
+![image](https://github.com/user-attachments/assets/7d5c5dad-d41c-450b-972e-9147c8fc2652)
+
+
+
+## Реализация
+Функция получения данных от клиента через WebSocket, выбор соответствующего алгоритма.
+```java
+ @MessageMapping("/drawCurveLineOrder")
+    @SendTo("/topic/curveLine")
+    public List<Point> receivePointsToCurveLine(@RequestBody JsonNode jsonData) {
+        System.out.println("websocket3 correct work");
+        List<Point> result = new ArrayList<>();
+        System.out.println(jsonData.get("figure").asText());
+        if (jsonData.get("figure").asText().equals("Hermite")) {
+            result = parametricCurvesService.generateHermiteCurve(jsonData);
+        } else if (jsonData.get("figure").asText().equals("B-spline")) {
+            result = parametricCurvesService.generateBSplineCurve(jsonData);
+        } else {
+            result = parametricCurvesService.generateBezierCurve(jsonData);
+        }
+        for (Point p : result) {
+            System.out.println(p.getX() + " " + p.getY());
+        }
+        return result;
+    }
+```
+
+Алгоритм построения кривой Эрмита.
+```java
+public List<Point> generateHermiteCurve(JsonNode jsonData) {
+        List<Point> points = parsePointsToAlgorithmsService.parseFromJson(jsonData);
+
+        if (points.size() != 4) {
+            throw new IllegalArgumentException("Для построения кривой Эрмита требуется ровно 4 точки.");
+        }
+        Point p0 = points.get(0);
+        Point p1 = points.get(1);
+        Point t0 = points.get(2);
+        Point t1 = points.get(3);
+
+        List<Point> hermiteCurve = new ArrayList<>();
+        int numPoints = 1000;
+
+        for (int i = 0; i <= numPoints; i++) {
+            double t = (double) i / numPoints;
+            Point interpolatedPoint = hermiteInterpolate(p0, p1, t0, t1, t);
+            hermiteCurve.add(interpolatedPoint);
+        }
+
+        return hermiteCurve;
+    }
+```
+
+## Вывод
+В ходе работы был создан простой графический редактор, позволяющий строить и визуализировать различные кривые алгоритмами Эрмита, Безье, B-сплайна. Для взаимодействия между серверной и клиентской частями использовался WebSocket, обеспечивающий передачу параметров в реальном времени.
+
+</details>
+
+<details>
+  <summary>Лаб 3</summary>
+  
+## Цель
+Разработать графическую программу, выполняющую следующие геометрические преобразования над трехмерным объектом: перемещение, поворот, скалирование, отображение, перспектива. В программе должно быть предусмотрено считывание координат 3D объекта из текстового файла, обработка клавиатуры и выполнение геометрических преобразований в зависимости от нажатых клавиш. Все преобразования следует производить с использованием матричного аппарата и представления координат в однородных координатах.
+
+## Афинные преобразования
+Аффинные преобразования — это класс геометрических преобразований в пространстве, которые сохраняют прямые линии и параллельность. Они широко используются в компьютерной графике, машинном обучении, физике и других областях для изменения положения, размера, ориентации и формы объектов.
+## Интерфейс
+![image](https://github.com/user-attachments/assets/e86b1ada-9e37-40d6-9305-c89a46f8f48e)
+
+
+
+
+## Реализация
+Парс точек из файла.
+```java
+private List<Point3D> parseFileContent(String fileContent) {
+        List<Point3D> vertices = new ArrayList<>();
+        String[] lines = fileContent.split("\n");
+
+        for (String line : lines) {
+            line = line.trim();
+            if (!line.isEmpty() && !line.startsWith("#")) {
+                String[] coords = line.split("\\s+");
+                if (coords.length == 3) {
+                    double x = Double.parseDouble(coords[0]);
+                    double y = Double.parseDouble(coords[1]);
+                    double z = Double.parseDouble(coords[2]);
+                    vertices.add(new Point3D(x, y, z));
+                }
+            }
+        }
+
+        return vertices;
+    }
+```
+
+Функция получения данных от клиента через WebSocket, выбор соответствующего алгоритма.
+```java
+@MessageMapping("/3dMode")
+    @SendTo("/topic/3dMode")
+    public List<Point3D> receivePointsTo3dMode(@RequestBody JsonNode jsonData) {
+        System.out.println("websocket4 correct work");
+        List<Point3D> result = new ArrayList<>();
+        System.out.println(jsonData.get("method").asText());
+        if (jsonData.get("method").asText().equals("translate")) {
+            if (jsonData.has("variable")) {
+                result = transformation.translate(this.vertices,jsonData.get("variable").asText(),jsonData.get("value").asDouble());
+            } else {
+                result = transformation.translate(this.vertices,jsonData.get("tx").asDouble(),jsonData.get("ty").asDouble(),jsonData.get("tz").asDouble());
+            }
+            this.vertices = result;
+        } else if (jsonData.get("method").asText().equals("scale")) {
+            result = this.vertices;
+        } else if (jsonData.get("method").asText().equals("rotate")) {
+            if (jsonData.has("keyboard")) {
+                if (jsonData.get("axis").asText().equals("x")) {
+                    this.angleX += jsonData.get("angle").asDouble();
+                    result = transformation.rotate(this.vertices,jsonData.get("axis").asText(),this.angleX);
+                } else if (jsonData.get("axis").asText().equals("y")) {
+                    this.angleY += jsonData.get("angle").asDouble();
+                    result = transformation.rotate(this.vertices,jsonData.get("axis").asText(),this.angleY);
+                } else if (jsonData.get("axis").asText().equals("z")) {
+                    this.angleZ += jsonData.get("angle").asDouble();
+                    result = transformation.rotate(this.vertices,jsonData.get("axis").asText(),this.angleZ);
+                }
+            } else {
+                if (jsonData.get("axis").asText().equals("x")) {
+                    this.angleX = jsonData.get("angle").asDouble();
+                    result = transformation.rotate(this.vertices,jsonData.get("axis").asText(),this.angleX);
+                } else if (jsonData.get("axis").asText().equals("y")) {
+                    this.angleY = jsonData.get("angle").asDouble();
+                    result = transformation.rotate(this.vertices,jsonData.get("axis").asText(),this.angleY);
+                } else if (jsonData.get("axis").asText().equals("z")) {
+                    this.angleZ = jsonData.get("angle").asDouble();
+                    result = transformation.rotate(this.vertices,jsonData.get("axis").asText(),this.angleZ);
+                }
+            }
+            System.out.println(this.angleX+" "+this.angleY +" "+this.angleZ);
+        } else if (jsonData.get("method").asText().equals("reflect")) {
+            result = transformation.reflect(this.vertices,jsonData.get("plane").asText());
+        } else if (jsonData.get("method").asText().equals("perspective")) {
+            if (jsonData.has("keyboard")) {
+                distance = jsonData.get("distance").asDouble();
+                result = transformation.perspective(this.vertices, distance);
+            } else {
+                distance += jsonData.get("distance").asDouble();
+                System.out.println(distance);
+                result = transformation.perspective(this.vertices, distance);
+            }
+        }
+        return result;
+    }
+```
+
+Функции для отображения вдоль оси XY.
+```java
+public List<Point3D> reflect(List<Point3D> vertices, String plane) {
+        switch (plane.toLowerCase()) {
+            case "xy":
+                return reflectXY(vertices);
+            case "xz":
+                return reflectXZ(vertices);
+            case "yz":
+                return reflectYZ(vertices);
+            default:
+                throw new IllegalArgumentException("Недопустимая плоскость. Используйте 'xy', 'xz' или 'yz'.");
+        }
+    }
+
+public List<Point3D> reflectXY(List<Point3D> vertices) {
+        return applyTransformation(vertices, REFLECT_XY_MATRIX);
+    }
+
+private List<Point3D> applyTransformation(List<Point3D> vertices, Matrix4x4 matrix) {
+        List<Point3D> transformedVertices = new ArrayList<>();
+        for (Point3D vertex : vertices) {
+            transformedVertices.add(matrix.multiply(vertex));
+        }
+        return transformedVertices;
+    }
+
+private static final Matrix4x4 REFLECT_XY_MATRIX = new Matrix4x4(new double[][]{
+            {1, 0, 0, 0},
+            {0, 1, 0, 0},
+            {0, 0, -1, 0},
+            {0, 0, 0, 1}
+    });
+```
+
+## Вывод
+В ходе работы был создан простой графический редактор, позволяющий работать с 3D объектами и выполнять основвные функции, такие как перемещение, отражение, перспектива, масштабирование, вращение. Для взаимодействия между серверной и клиентской частями использовался WebSocket, обеспечивающий передачу параметров в реальном времени.
+
+</details>
+
+
 ## Технологии
 - Java
 - Spring Boot

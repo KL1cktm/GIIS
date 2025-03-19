@@ -98,7 +98,7 @@ function drawNormals(normals) {
 }
 
 function convex(isConvex) {
-    if (isConvex) {
+    if (!isConvex) {
         alert('Полигон является вогнутым');
     } else {
         alert('Полигон является выпуклым');

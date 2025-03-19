@@ -209,7 +209,7 @@ public class WebSocketController {
             System.out.println(hull.size());
             messagingTemplate.convertAndSend("/topic/convexHull", hull);
         } else if (jsonData.get("method").asText().equals("jarvis")) {
-            List<Point> hull = polygonService.grahamScan(jsonData);
+            List<Point> hull = polygonService.jarvisMarch(jsonData);
             System.out.println(hull.size());
             messagingTemplate.convertAndSend("/topic/convexHull", hull);
         } else if (jsonData.get("method").asText().equals("Bresenham")) {

@@ -20,4 +20,9 @@ public class MainPageController {
     public String lab2Page() {
         return "3dMode";
     }
+
+    @GetMapping("/polygon")
+    public String polygonPage() {
+        return "Polygon";
+    }
 }

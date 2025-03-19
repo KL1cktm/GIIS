@@ -2,6 +2,7 @@ package by.yurhilevich.editorShapes.controllers;
 
 import by.yurhilevich.editorShapes.models.Point;
 import by.yurhilevich.editorShapes.models.Point3D;
+import by.yurhilevich.editorShapes.models.Vector;
 import by.yurhilevich.editorShapes.services.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @Controller
@@ -25,6 +28,7 @@ public class WebSocketController {
     private final LineSecondOrderAlgorithm lineSecondOrderAlgorithm;
     private final ParametricCurvesService parametricCurvesService;
     private final Transformation transformation;
+    private final PolygonService polygonService;
     private List<Point3D> vertices;
     private double angleX = 0;
     private double angleY = 0;
@@ -34,7 +38,8 @@ public class WebSocketController {
     @Autowired
     public WebSocketController(SimpMessagingTemplate messagingTemplate, WuLineAlgorithm wuLineAlgorithm,
                                DigitalDifferentialAnalyzer numericDiffAnalyzer, BresenhamAlgorithm bresenhamAlgorithm,
-                               LineSecondOrderAlgorithm lineSecondOrderAlgorithm, ParametricCurvesService parametricCurvesService, Transformation transformation) {
+                               LineSecondOrderAlgorithm lineSecondOrderAlgorithm, ParametricCurvesService parametricCurvesService, Transformation transformation,
+                               PolygonService polygonService) {
         this.messagingTemplate = messagingTemplate;
         this.wuLineAlgorithm = wuLineAlgorithm;
         this.digitalDifferentialAnalyzer = numericDiffAnalyzer;
@@ -42,6 +47,7 @@ public class WebSocketController {
         this.lineSecondOrderAlgorithm = lineSecondOrderAlgorithm;
         this.parametricCurvesService = parametricCurvesService;
         this.transformation = transformation;
+        this.polygonService = polygonService;
     }
 
     @MessageMapping("/draw")
@@ -113,9 +119,9 @@ public class WebSocketController {
         System.out.println(jsonData.get("method").asText());
         if (jsonData.get("method").asText().equals("translate")) {
             if (jsonData.has("variable")) {
-                result = transformation.translate(this.vertices,jsonData.get("variable").asText(),jsonData.get("value").asDouble());
+                result = transformation.translate(this.vertices, jsonData.get("variable").asText(), jsonData.get("value").asDouble());
             } else {
-                result = transformation.translate(this.vertices,jsonData.get("tx").asDouble(),jsonData.get("ty").asDouble(),jsonData.get("tz").asDouble());
+                result = transformation.translate(this.vertices, jsonData.get("tx").asDouble(), jsonData.get("ty").asDouble(), jsonData.get("tz").asDouble());
             }
             this.vertices = result;
         } else if (jsonData.get("method").asText().equals("scale")) {
@@ -124,29 +130,29 @@ public class WebSocketController {
             if (jsonData.has("keyboard")) {
                 if (jsonData.get("axis").asText().equals("x")) {
                     this.angleX += jsonData.get("angle").asDouble();
-                    result = transformation.rotate(this.vertices,jsonData.get("axis").asText(),this.angleX);
+                    result = transformation.rotate(this.vertices, jsonData.get("axis").asText(), this.angleX);
                 } else if (jsonData.get("axis").asText().equals("y")) {
                     this.angleY += jsonData.get("angle").asDouble();
-                    result = transformation.rotate(this.vertices,jsonData.get("axis").asText(),this.angleY);
+                    result = transformation.rotate(this.vertices, jsonData.get("axis").asText(), this.angleY);
                 } else if (jsonData.get("axis").asText().equals("z")) {
                     this.angleZ += jsonData.get("angle").asDouble();
-                    result = transformation.rotate(this.vertices,jsonData.get("axis").asText(),this.angleZ);
+                    result = transformation.rotate(this.vertices, jsonData.get("axis").asText(), this.angleZ);
                 }
             } else {
                 if (jsonData.get("axis").asText().equals("x")) {
                     this.angleX = jsonData.get("angle").asDouble();
-                    result = transformation.rotate(this.vertices,jsonData.get("axis").asText(),this.angleX);
+                    result = transformation.rotate(this.vertices, jsonData.get("axis").asText(), this.angleX);
                 } else if (jsonData.get("axis").asText().equals("y")) {
                     this.angleY = jsonData.get("angle").asDouble();
-                    result = transformation.rotate(this.vertices,jsonData.get("axis").asText(),this.angleY);
+                    result = transformation.rotate(this.vertices, jsonData.get("axis").asText(), this.angleY);
                 } else if (jsonData.get("axis").asText().equals("z")) {
                     this.angleZ = jsonData.get("angle").asDouble();
-                    result = transformation.rotate(this.vertices,jsonData.get("axis").asText(),this.angleZ);
+                    result = transformation.rotate(this.vertices, jsonData.get("axis").asText(), this.angleZ);
                 }
             }
-            System.out.println(this.angleX+" "+this.angleY +" "+this.angleZ);
+            System.out.println(this.angleX + " " + this.angleY + " " + this.angleZ);
         } else if (jsonData.get("method").asText().equals("reflect")) {
-            result = transformation.reflect(this.vertices,jsonData.get("plane").asText());
+            result = transformation.reflect(this.vertices, jsonData.get("plane").asText());
         } else if (jsonData.get("method").asText().equals("perspective")) {
             if (jsonData.has("keyboard")) {
                 distance = jsonData.get("distance").asDouble();
@@ -186,5 +192,55 @@ public class WebSocketController {
         }
 
         return vertices;
+    }
+
+    @MessageMapping("/sendPolygonPoints")
+    private void polygonManager(@RequestBody JsonNode jsonData) {
+        System.out.println("WORK CORRECTLY POLYGON");
+        if (jsonData.get("method").asText().equals("convex")) {
+            boolean isConvex = polygonService.isConvex(jsonData);
+            messagingTemplate.convertAndSend("/topic/convexResult", isConvex);
+            System.out.println("выпуклый или нет");
+        } else if (jsonData.get("method").asText().equals("normals")) {
+            List<Vector> normals = polygonService.findInnerNormals(jsonData);
+            messagingTemplate.convertAndSend("/topic/getNormals", normals);
+        } else if (jsonData.get("method").asText().equals("graham")) {
+            List<Point> hull = polygonService.grahamScan(jsonData);
+            System.out.println(hull.size());
+            messagingTemplate.convertAndSend("/topic/convexHull", hull);
+        } else if (jsonData.get("method").asText().equals("jarvis")) {
+            List<Point> hull = polygonService.grahamScan(jsonData);
+            System.out.println(hull.size());
+            messagingTemplate.convertAndSend("/topic/convexHull", hull);
+        } else if (jsonData.get("method").asText().equals("Bresenham")) {
+            System.out.println("Bresenham");
+            List<Point> points = bresenhamAlgorithm.drawLine(jsonData);
+            Map<String, Object> response = new HashMap<>();
+            response.put("algorithm", "Bresenham");
+            response.put("points", points);
+            messagingTemplate.convertAndSend("/topic/line", response);
+        } else if (jsonData.get("method").asText().equals("DDA")) {
+            System.out.println("DDA");
+            List<Point> points = digitalDifferentialAnalyzer.processing(jsonData);
+            Map<String, Object> response = new HashMap<>();
+            response.put("algorithm", "DDA");
+            response.put("points", points);
+            messagingTemplate.convertAndSend("/topic/line", response);
+        } else if (jsonData.get("method").asText().equals("WU")) {
+            System.out.println("WU");
+            List<Point> points = wuLineAlgorithm.drawLine(jsonData);
+            Map<String, Object> response = new HashMap<>();
+            response.put("algorithm", "WU");
+            response.put("points", points);
+            messagingTemplate.convertAndSend("/topic/line", response);
+        } else if (jsonData.get("method").asText().equals("intersection")) {
+            System.out.println("intersection");
+            List<Point> points = polygonService.intersection(jsonData);
+            for (Point p : points) {
+                System.out.println(p.getX() + "\t" + p.getY());
+            }
+            System.out.println(points.size());
+            messagingTemplate.convertAndSend("/topic/intersection", points);
+        }
     }
 }

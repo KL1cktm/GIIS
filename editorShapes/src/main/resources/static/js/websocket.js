@@ -1,7 +1,5 @@
 let stompClient = null;
 
-
-
 function connect() {
     const socket = new SockJS('/lab1');
     stompClient = Stomp.over(socket);

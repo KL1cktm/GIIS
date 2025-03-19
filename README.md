@@ -359,6 +359,131 @@ private static final Matrix4x4 REFLECT_XY_MATRIX = new Matrix4x4(new double[][]{
 
 </details>
 
+<details>
+  <summary>Лаб 5</summary>
+  
+## Цель
+Разработать элементарный графический редактор, реализующий построение полигонов. Реализованная программа должна уметь проверять полигон на выпуклось, находить его внутренние нормали. Программа должна выполнять построения выпуклых оболочек методом обхода Грэхема и методом Джарвиса. Выбор метода задается из пункта меню и должен быть доступен через панель инструментов «Построение полигонов». Графический редактор должен позволять рисовать линии первого порядка (лабораторная работа №1) и определять точки пересечения отрезка со стороной полигона, также программа должна определять принадлежность введенной точки полигону.
+
+## Алгоритм Джарвиса
+Алгоритм Джарвиса, также известный как "алгоритм заворачивания подарка", строит выпуклую оболочку множества точек, последовательно находя точки, которые образуют внешнюю границу. Алгоритм работает за время O(n * h), где n — количество точек, а h — количество точек в выпуклой оболочке.
+
+## Алгоритм Грэхэма
+Алгоритм Грэхэма строит выпуклую оболочку, обходя точки в порядке их угла относительно начальной точки. Алгоритм работает за время O(n log n), где n — количество точек.
+
+## Алгоритм пересечения
+Алгоритм находит точки пересечения полигона с заданной прямой. Для этого проверяются пересечения каждой стороны полигона с прямой и вычисляются точки пересечения.
+
+## Интерфейс
+![image](https://github.com/user-attachments/assets/b91814b2-e5b0-4e37-9a45-834e1f9a5b1b)
+
+
+
+## Реализация
+Алгоритм Джарвиса.
+```java
+public List<Point> jarvisMarch(JsonNode jsonData) {
+        List<Point> points = parsePointsToAlgorithmsService.parseFromJson(jsonData);
+        if (points.size() < 3) {
+            return points;
+        }
+
+        List<Point> hull = new ArrayList<>();
+
+        Point start = points.get(0);
+        for (Point p : points) {
+            if (p.getX() < start.getX()) {
+                start = p;
+            }
+        }
+
+        Point current = start;
+        do {
+            hull.add(current);
+            Point next = points.get(0);
+
+            for (Point p : points) {
+                if (p == current) continue;
+                int cross = ccw(current, next, p);
+                if (next == current || cross == -1 || (cross == 0 && distance(current, p) > distance(current, next))) {
+                    next = p;
+                }
+            }
+            current = next;
+        } while (current != start);
+
+        return hull;
+    }
+```
+
+Алгоритм Грэхэма.
+```java
+public List<Point> grahamScan(JsonNode jsonData) {
+        List<Point> points = parsePointsToAlgorithmsService.parseFromJson(jsonData);
+        if (points.size() < 3) {
+            return points;
+        }
+
+        Point start = points.get(0);
+        for (Point p : points) {
+            if (p.getY() < start.getY() || (p.getY() == start.getY() && p.getX() < start.getX())) {
+                start = p;
+            }
+        }
+
+        final Point finalStart = start;
+
+        points.sort((p1, p2) -> {
+            double angle1 = Math.atan2(p1.getY() - finalStart.getY(), p1.getX() - finalStart.getX());
+            double angle2 = Math.atan2(p2.getY() - finalStart.getY(), p2.getX() - finalStart.getX());
+            return Double.compare(angle1, angle2);
+        });
+
+        Stack<Point> hull = new Stack<>();
+        hull.push(points.get(0));
+        hull.push(points.get(1));
+
+        for (int i = 2; i < points.size(); i++) {
+            Point top = hull.pop();
+            while (ccw(hull.peek(), top, points.get(i)) <= 0) {
+                top = hull.pop();
+            }
+            hull.push(top);
+            hull.push(points.get(i));
+        }
+
+        return new ArrayList<>(hull);
+    }
+```
+
+Алгоритм пересечения.
+```java
+public List<Point> intersection(JsonNode jsonData) {
+        List<Point> pointsPolygon = parsePointsToAlgorithmsService.parseFromJson(jsonData);
+        List<Point> pointsLine = parseFromJson(jsonData);
+        List<Point> intersections = new ArrayList<>();
+        for (int i = 0; i < pointsPolygon.size(); i++) {
+            Point A = pointsPolygon.get(i);
+            Point B = pointsPolygon.get((i + 1) % pointsPolygon.size());
+            for (int j = 0; j < pointsLine.size() - 1; j++) {
+                Point C = pointsLine.get(j);
+                Point D = pointsLine.get(j + 1);
+                Point intersection = findIntersection(A, B, C, D);
+                if (intersection != null) {
+                    intersections.add(intersection);
+                }
+            }
+        }
+
+        return intersections;
+    }
+```
+
+## Вывод
+В ходе работы были реализованы алгоритмы Джарвиса и Грэхэма для построения выпуклой оболочки, а также алгоритм поиска пересечения полигона с прямой. Программа предоставляет графический интерфейс для визуализации работы алгоритмов и взаимодействия с пользователем.
+
+</details>
+
 
 ## Технологии
 - Java

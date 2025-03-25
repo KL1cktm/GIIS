@@ -84,7 +84,18 @@
     <button class="btn btn-warning" id="DDA">ЦДА</button>
     <button class="btn btn-warning" id="WU">ВУ</button>
     <button class="btn btn-warning" id="intersection">Пересечение</button>
+    <button class="btn btn-primary" id="scanlineFill">Простая растровая развёртка</button>
+    <button class="btn btn-primary" id="activeEdgeFill">Растровый с активными рёбрами</button>
+    <button class="btn btn-primary" id="floodFill">С затравкой</button>
+    <button class="btn btn-primary" id="scanlineFloodFill">Построчный с затравкой</button>
     <button class="btn btn-danger" id="clear">Очистить</button>
+    <div>
+        <label for="speed">Скорость отрисовки:</label>
+        <input type="range" id="speed" min="1" max="100" value="50">
+    </div>
+    <div>
+        <button id="debugMode">Debug Mode</button>
+    </div>
     <a class="btn btn-info" href="/lab1">Вернуться к 2D</a>
 </div>
 
@@ -225,6 +236,7 @@
 <script src="/js/stomp.min.js"></script>
 <script src="/js/polygons/variables.js"></script>
 <script src="/js/polygons/websocket.js"></script>
+<script src="/js/polygons/polygonFilling.js"></script>
 <script src="/js/polygons/polygonMethods.js"></script>
 <script src="/js/bootstrap.bundle.min.js"></script>
 </body>

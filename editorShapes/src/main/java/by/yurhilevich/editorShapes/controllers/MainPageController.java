@@ -25,4 +25,9 @@ public class MainPageController {
     public String polygonPage() {
         return "Polygon";
     }
+
+    @GetMapping("/deloneAndVerone")
+    public String lab7Page() {
+        return "lab7";
+    }
 }

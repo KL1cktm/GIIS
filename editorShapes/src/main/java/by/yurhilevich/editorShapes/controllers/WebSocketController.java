@@ -1,8 +1,6 @@
 package by.yurhilevich.editorShapes.controllers;
 
-import by.yurhilevich.editorShapes.models.Point;
-import by.yurhilevich.editorShapes.models.Point3D;
-import by.yurhilevich.editorShapes.models.Vector;
+import by.yurhilevich.editorShapes.models.*;
 import by.yurhilevich.editorShapes.services.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +25,10 @@ public class WebSocketController {
     private final BresenhamAlgorithm bresenhamAlgorithm;
     private final LineSecondOrderAlgorithm lineSecondOrderAlgorithm;
     private final ParametricCurvesService parametricCurvesService;
+    private final DelaunayTriangulator delaunayTriangulator;
     private final Transformation transformation;
     private final PolygonService polygonService;
+    private final VoronoiDiagramGenerator voronoiDiagramGenerator;
     private List<Point3D> vertices;
     private double angleX = 0;
     private double angleY = 0;
@@ -39,7 +39,7 @@ public class WebSocketController {
     public WebSocketController(SimpMessagingTemplate messagingTemplate, WuLineAlgorithm wuLineAlgorithm,
                                DigitalDifferentialAnalyzer numericDiffAnalyzer, BresenhamAlgorithm bresenhamAlgorithm,
                                LineSecondOrderAlgorithm lineSecondOrderAlgorithm, ParametricCurvesService parametricCurvesService, Transformation transformation,
-                               PolygonService polygonService) {
+                               PolygonService polygonService, DelaunayTriangulator delaunayTriangulator, VoronoiDiagramGenerator voronoiDiagramGenerator) {
         this.messagingTemplate = messagingTemplate;
         this.wuLineAlgorithm = wuLineAlgorithm;
         this.digitalDifferentialAnalyzer = numericDiffAnalyzer;
@@ -48,6 +48,8 @@ public class WebSocketController {
         this.parametricCurvesService = parametricCurvesService;
         this.transformation = transformation;
         this.polygonService = polygonService;
+        this.delaunayTriangulator = delaunayTriangulator;
+        this.voronoiDiagramGenerator = voronoiDiagramGenerator;
     }
 
     @MessageMapping("/draw")
@@ -241,6 +243,22 @@ public class WebSocketController {
             }
             System.out.println(points.size());
             messagingTemplate.convertAndSend("/topic/intersection", points);
+        }
+    }
+
+    @MessageMapping("/sendPointsLab7")
+    private void lab7Manager(@RequestBody JsonNode jsonData) {
+        System.out.println("WORK CORRECTLY LAB7");
+        if (jsonData.get("algorithm").asText().equals("delone")) {
+            List<Triangle> triangles = delaunayTriangulator.triangulate(jsonData);
+            System.out.println(triangles.size());
+            messagingTemplate.convertAndSend("/topic/delone", triangles);
+            System.out.println("триангуляция");
+        } else {
+            Map<Point, List<Point>> voronoiDiagram =
+                    voronoiDiagramGenerator.generateVoronoiDiagram(jsonData);
+            List<Edge> edges = voronoiDiagramGenerator.getVoronoiEdges(voronoiDiagram);
+            messagingTemplate.convertAndSend("/topic/voron", edges);
         }
     }
 }

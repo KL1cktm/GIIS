@@ -485,6 +485,109 @@ public List<Point> intersection(JsonNode jsonData) {
 </details>
 
 <details>
+  <summary>Лаб 6: Алгоритмы заливки полигонов</summary>
+
+## Цель
+Реализация и сравнительный анализ четырех алгоритмов заливки полигонов:
+1. Построчное сканирование (Scanline Fill)
+2. Метод активных ребер (Active Edge Fill)
+3. Заливка с затравкой (Flood Fill)
+4. Оптимизированная построчная заливка (Scanline Flood Fill)
+
+## Описание алгоритмов
+
+### Построчное сканирование
+Алгоритм, который:
+- Находит пересечения границ полигона с каждой горизонтальной линией
+- Сортирует точки пересечения по X-координате
+- Закрашивает отрезки между четными и нечетными пересечениями
+- Временная сложность: O(n log n)
+
+### Метод активных ребер
+Улучшенная версия алгоритма построчного сканирования:
+- Поддерживает список "активных" ребер (пересекающих текущую строку)
+- Обновляет координаты X пересечений с помощью наклона ребер
+- Более эффективен для сложных полигонов
+
+### Заливка с затравкой
+Рекурсивный алгоритм:
+- Начинает заливку из заданной точки внутри полигона
+- Распространяется во всех направлениях до границ
+- Использует стек для избежания переполнения
+
+### Оптимизированная построчная заливка
+Гибридный алгоритм:
+- Сочетает преимущества построчного сканирования и заливки с затравкой
+- Находит целые горизонтальные отрезки для заливки
+- Наиболее эффективен для сплошных областей
+
+## Интерфейс
+![image](https://github.com/user-attachments/assets/af75a7c5-ee38-4e07-9ec0-07586b716f5f)
+
+
+## Реализация
+
+### Метод активных рёбер
+```js
+async function activeEdgeFill(points) {
+    if (points.length < 3) return;
+
+    const edges = [];
+    const minY = Math.min(...points.map(p => p.y));
+    const maxY = Math.max(...points.map(p => p.y));
+
+    for (let i = 0; i < points.length; i++) {
+        const p1 = points[i];
+        const p2 = points[(i + 1) % points.length];
+
+        if (p1.y !== p2.y) {
+            const ymin = Math.min(p1.y, p2.y);
+            const ymax = Math.max(p1.y, p2.y);
+            const x = p1.y < p2.y ? p1.x : p2.x;
+            const slope = (p2.x - p1.x) / (p2.y - p1.y);
+
+            edges.push({ ymin, ymax, x, slope });
+        }
+    }
+
+    edges.sort((a, b) => a.ymin - b.ymin);
+
+    let activeEdges = [];
+    for (let y = minY; y <= maxY; y++) {
+        for (let i = 0; i < activeEdges.length; i++) {
+            activeEdges[i].x += activeEdges[i].slope;
+        }
+
+        activeEdges = activeEdges.filter(edge => edge.ymax > y);
+
+        while (edges.length > 0 && edges[0].ymin <= y) {
+            activeEdges.push(edges.shift());
+        }
+
+        activeEdges.sort((a, b) => a.x - b.x);
+
+        for (let i = 0; i < activeEdges.length; i += 2) {
+            const x1 = Math.ceil(activeEdges[i].x);
+            const x2 = Math.floor(activeEdges[i + 1].x);
+
+            ctx.beginPath();
+            ctx.moveTo(x1, y);
+            ctx.lineTo(x2, y);
+            ctx.stroke();
+
+            if (debugMode) await sleep(speed);
+        }
+    }
+}
+```
+
+## Вывод
+В ходе работы были реализованы алгоритмы построчного сканирования, метод активных рёбер, заливка с затравкой, построчная затравка. Программа предоставляет графический интерфейс для визуализации работы алгоритмов и взаимодействия с пользователем.
+
+
+</details>
+
+<details>
   <summary>Лаб 7</summary>
 
 ## Цель

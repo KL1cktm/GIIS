@@ -485,7 +485,7 @@ public List<Point> intersection(JsonNode jsonData) {
 </details>
 
 <details>
-  <summary>Лаб 6: Алгоритмы заливки полигонов</summary>
+  <summary>Лаб 6</summary>
 
 ## Цель
 Реализация и сравнительный анализ четырех алгоритмов заливки полигонов:

@@ -484,6 +484,98 @@ public List<Point> intersection(JsonNode jsonData) {
 
 </details>
 
+<details>
+  <summary>Лаб 7</summary>
+
+## Цель
+Реализация алгоритмов триангуляции Делоне и построения диаграммы Вороного для множества точек на плоскости. Разработка интерактивного редактора, позволяющего визуализировать оба представления пространственного разбиения.
+
+## Описание алгоритмов
+
+### Триангуляция Делоне
+Алгоритм, который разбивает множество точек на треугольники, удовлетворяющие условию Делоне:
+- Ни одна точка не лежит внутри описанной окружности любого треугольника
+- Минимизирует количество "узких" треугольников
+- Основан на алгоритме Боуера-Ватсона с временной сложностью O(n log n)
+
+### Диаграмма Вороного
+Двойственное представление триангуляции Делоне, где:
+- Каждая ячейка содержит точки, ближайшие к одному из сайтов
+- Вершины диаграммы - центры описанных окружностей треугольников Делоне
+- Ребра диаграммы перпендикулярны ребрам триангуляции
+
+## Интерфейс
+![image](https://github.com/user-attachments/assets/60f21984-a5b4-4bc1-bb29-c8550ad4d1e5)
+
+## Реализация
+
+### Метод выбора алгоритма
+```java
+@MessageMapping("/sendPointsLab7")
+    private void lab7Manager(@RequestBody JsonNode jsonData) {
+        System.out.println("WORK CORRECTLY LAB7");
+        if (jsonData.get("algorithm").asText().equals("delone")) {
+            List<Triangle> triangles = delaunayTriangulator.triangulate(jsonData);
+            System.out.println(triangles.size());
+            messagingTemplate.convertAndSend("/topic/delone", triangles);
+            System.out.println("триангуляция");
+        } else {
+            Map<Point, List<Point>> voronoiDiagram =
+                    voronoiDiagramGenerator.generateVoronoiDiagram(jsonData);
+            List<Edge> edges = voronoiDiagramGenerator.getVoronoiEdges(voronoiDiagram);
+            messagingTemplate.convertAndSend("/topic/voron", edges);
+        }
+    }
+```
+
+### Треугольник
+```java
+public class Triangle {
+    private final Point a;
+    private final Point b;
+    private final Point c;
+    public Triangle(Point a, Point b, Point c) {
+        if (a == null || b == null || c == null) {
+            throw new IllegalArgumentException("Triangle vertices cannot be null");
+        }
+        this.a = a;
+        this.b = b;
+        this.c = c;
+    }
+    public Point getA() {
+        return a;
+    }
+    public Point getB() {
+        return b;
+    }
+    public Point getC() {
+        return c;
+    }
+    public List<Edge> getEdges() {
+        List<Edge> edges = new ArrayList<>();
+        edges.add(new Edge(a, b));
+        edges.add(new Edge(b, c));
+        edges.add(new Edge(c, a));
+        return edges;
+    }
+    public boolean containsEdge(Edge edge) {
+        return getEdges().contains(edge);
+    }
+    public boolean containsVertex(Point point) {
+        return a.equals(point) || b.equals(point) || c.equals(point);
+    }
+    public boolean isDegenerate() {
+        long area = (long)(b.getX() - a.getX()) * (c.getY() - a.getY()) -
+                (long)(b.getY() - a.getY()) * (c.getX() - a.getX());
+        return area == 0;
+    }
+}
+```
+
+## Вывод
+В ходе работы были реализованы алгоритмы построения триангуляции Делоне и диаграммы Вороного. Программа предоставляет графический интерфейс для визуализации работы алгоритмов и взаимодействия с пользователем.
+
+</details>
 
 ## Технологии
 - Java
